@@ -88,8 +88,11 @@ if (pathNames[1] === 'for-rent') {
           linkToPopUp.name = currBorough;
           const complaintInfo = document.createElement('li')
           complaintInfo.className = 'details_info'
-          complaintInfo.innerHTML = `${dataLength} complaints against building <button style="margin-left: 15px; padding: 3px 0px; margin-top: 4px;"><a name="${currBorough}" id="${address}" style="padding: 5px 20px">See more</a></button>`
-          complaintInfo.children[0].addEventListener('click', showComplaints)
+          complaintInfo.style = myJson.length ? "background-color: #FFFBB6;" : null
+        complaintInfo.innerHTML = `${dataLength} complaints against building ${myJson.length ? `<button style="margin-left: 170px; padding: 3px 0px; margin-top: 4px;"><a name="${currBorough}" id="${address}" style="padding: 5px 20px">See more</a></button>`: ''}`
+          if (myJson.length) {
+            complaintInfo.children[0].addEventListener('click', showComplaints)
+          }
           // let jsonData = document.createElement('button');
           // jsonData.style =
           //   'font-size: 20px; padding: 2% 4%; text-align: center; margin-left: 4px';
@@ -134,7 +137,8 @@ if (pathNames[1] === 'for-rent') {
                   </tr>`;
             })
             .join('')}
-          </tbody>`;
+            <tr/>
+          </tbody>`
       } else {
         dataTable.innerHTML = `
           <thead> 
