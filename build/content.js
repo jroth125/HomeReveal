@@ -1,16 +1,5 @@
 // Good date query is below (gets the last 5 years)
 // https://data.cityofnewyork.us/resource/erm2-nwe9.json?incident_address=792%20STERLING%20PLACE&$where=created_date%20between%20%272015-01-10T12:00:00%27%20and%20%272019-01-10T14:00:00%27
-/* 
-to get zip code of the apartments you are looking at
-let link = document.getElementsByClassName('details-titleLink')[0].href
-let res = await fetch(link)
-let htmltext = await res.text()
-let dummy = await document.createElement('div')
-dummy.innerHTML = htmltext
-let addressEnd = await dummy.getElementsByClassName('backend_data')[0].getElementsByTagName('span')[0].innerText.split(' ')
-let idx = addressEnd.indexOf('NY')
-let boroughZipID = addressEnd[idx + 1].slice(0, 5)
-*/
 
 //Helper functions
 const getZipCode = async () => {
@@ -93,13 +82,6 @@ if (pathNames[1] === 'for-rent') {
           if (myJson.length) {
             complaintInfo.children[0].addEventListener('click', showComplaints)
           }
-          // let jsonData = document.createElement('button');
-          // jsonData.style =
-          //   'font-size: 20px; padding: 2% 4%; text-align: center; margin-left: 4px';
-
-          // jsonData.addEventListener('click', showComplaints);
-
-          // jsonData.appendChild(linkToPopUp);
           item.getElementsByTagName('ul')[0].appendChild(complaintInfo);
         }
       });
