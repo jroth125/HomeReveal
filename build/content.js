@@ -2,11 +2,68 @@
 // https://data.cityofnewyork.us/resource/erm2-nwe9.json?incident_address=792%20STERLING%20PLACE&$where=created_date%20between%20%272015-01-10T12:00:00%27%20and%20%272019-01-10T14:00:00%27
 
 //Helper functions
+function clickHandler(e, complaintData) {
+  if (!+e.target.clicked) {
+    e.target.innerText = 'Hide';
+    let button = e.target;
+    e.target.clicked = 1;
+
+    let table = button.parentElement.parentElement;
+
+    let dataTable = document.createElement('table');
+    const tableContainer = document.createElement('div');
+    if (complaintData[0]) {
+      tableContainer.style =
+        'width: 500px; overflow: scroll; max-height: 276px; border-width: 1px; border-top: 0px; border-color: black; border-style: dashed; background-color: #FFFBB6; margin-top: 0px; display: flex; justify-content: center; align-content: center;';
+      dataTable.innerHTML = `
+    <thead> 
+        <tr> <td><b style="margin-right: position: sticky; 7px;">Date of Complaint</b></td>  <td><b>Complaint Type</b></td> <td style="padding-left: 15px;"><b>Description</b></td></tr>
+    </thead> 
+    <tbody style="max-height: 274px;">${complaintData
+      .map(incident => {
+        let createdDateArr = incident.created_date.split('-');
+        let createdDateHuman = `${createdDateArr[1]}/${createdDateArr[0]}`;
+        return `<tr>
+                <td style="width: 130px;"> ${createdDateHuman}</td>       
+                <td style="width: 150px;"> ${
+                  incident.complaint_type
+                } </td>
+                <td style="padding-left: 15px;">${incident.descriptor[0] +
+                  incident.descriptor.slice(1).toLowerCase()}</td>
+            </tr>`;
+      })
+      .join('')}
+    </tbody>`;
+      e.target.parentElement.style =
+        'background-color: #FFFBB6; margin-bottom: 0px; width: 500px; border: 1px black dashed; border-bottom: 0px;';
+    } else {
+      dataTable.innerHTML = `
+    <thead> 
+        <tr> <b style='text-align: left'> No complaints to show </b></tr>
+    </thead>`;
+      tableContainer.style = `width: '${table.width}px'; padding-bottom: 10px; background-color: #FFFBB6; margin-top: 0px; display: flex; justify-content: center; align-content: center;`;
+    }
+    dataTable.className = 'dataTable';
+    tableContainer.id = 'tableContainer';
+    tableContainer.appendChild(dataTable);
+    table.appendChild(tableContainer);
+  } else if (+e.target.clicked) {
+    e.target.innerText = 'See all';
+    e.target.clicked = 0;
+    e.target.parentElement.style =
+      'background-color: #FFFBB6; margin-bottom: 0px';
+    let article = e.target.parentElement.parentElement;
+    let dataTable = article.querySelector('#tableContainer');
+    dataTable.remove();
+  }
+}
+
 const getZipCode = async () => {
   let link = document.getElementsByClassName('details-titleLink')[0].href;
   let res = await fetch(link);
   let htmltext = await res.text();
   let dummy = await document.createElement('div');
+
   dummy.innerHTML = htmltext;
   let addressEnd = await dummy
     .getElementsByClassName('backend_data')[0]
@@ -71,20 +128,22 @@ chrome.storage.sync.get(['homeRevealOn'], async result => {
           linkToPopUp.style = 'padding-top: 40px;';
           linkToPopUp.id = address;
           linkToPopUp.name = currBorough;
-          const complaintInfo = document.createElement('li');
+          const listContainer = document.createElement('li')
+          const complaintInfo = document.createElement('div');
           complaintInfo.className = 'details_info';
           complaintInfo.style = myJson.length
-            ? 'background-color: #FFFBB6;'
+            ? 'background-color: #FFFBB6; display: flex; justify-content: space-between; flex-direction: row;'
             : null;
-          complaintInfo.innerHTML = `${dataLength} complaints against building ${
+          complaintInfo.innerHTML = `<span>${dataLength} complaints against this building</span> ${
             myJson.length
-              ? `<button style="margin-left: 170px; padding: 3px 0px; margin-top: 4px;"><a name="${currBorough}" id="${address}" style="padding: 5px 20px">See more</a></button>`
+              ? `<button style="padding: 3px 0px; margin-top: 4px;"><a name="${currBorough}" id="${address}" style="padding: 5px 20px">See more</a></button>`
               : ''
           }`;
           if (myJson.length) {
-            complaintInfo.children[0].addEventListener('click', showComplaints);
+            complaintInfo.children[1].addEventListener('click', showComplaints);
           }
-          item.getElementsByTagName('ul')[0].appendChild(complaintInfo);
+          listContainer.appendChild(complaintInfo)
+          item.getElementsByTagName('ul')[0].appendChild(listContainer);
         }
       });
 
@@ -95,8 +154,7 @@ chrome.storage.sync.get(['homeRevealOn'], async result => {
           e.target.clicked = 1;
           let currBorough = button.name;
           let address = button.id;
-
-          let table = button.parentElement.parentElement;
+          let table = button.parentElement.parentElement.parentElement;
           const data = await fetch(
             `https://data.cityofnewyork.us/resource/erm2-nwe9.json?incident_address=${address}&$where=created_date%20between%20%272015-01-10T12:00:00%27%20and%20%272019-11-10T14:00:00%27&borough=${currBorough}&location_type=RESIDENTIAL BUILDING`
           );
@@ -104,6 +162,7 @@ chrome.storage.sync.get(['homeRevealOn'], async result => {
           console.log('data is', json);
           const jsonData = json.reverse();
           const tableContainer = document.createElement('div');
+          const endNote = document.createElement('p');
           let dataTable = document.createElement('table');
           if (json[0]) {
             dataTable.innerHTML = `
@@ -128,13 +187,17 @@ chrome.storage.sync.get(['homeRevealOn'], async result => {
               <tr> <b style='text-align: center;'> No complaints to show </b></tr>
           </thead>`;
           }
-          dataTable.className = 'dataTable';
+          endNote.innerText =
+            'Data taken from NYC Open Data on all residential 311 building complaints made in the last five years';
+          tableContainer.className = 'dataTable';
           dataTable.style = 'overflow: scroll; max-height: 276px;';
+          tableContainer.style =
+            'display: flex; justify-content: center; align-content: center;';
           tableContainer.appendChild(dataTable);
           table.appendChild(tableContainer);
         } else if (+e.target.clicked) {
           e.target.clicked = 0;
-          let article = e.target.parentElement.parentElement;
+          let article = e.target.parentElement.parentElement.parentElement;
           let dataTable = article.querySelector('.dataTable');
           dataTable.remove();
         } else {
@@ -154,71 +217,28 @@ chrome.storage.sync.get(['homeRevealOn'], async result => {
       const currBorough = getCurrentBorough(boroughZipID);
       console.log('the current borough is...', currBorough);
 
-      const simpleAddress = document
-        .getElementsByClassName('backend_data')[0]
-        .getElementsByTagName('a')[0]
-        .innerText.toUpperCase();
+      let simpleAddress = document
+        .querySelector('main')
+        .querySelector('.incognito')
+        .innerText.split(' ')
 
-      function clickHandler(e, complaintData) {
-        if (!+e.target.clicked) {
-          e.target.innerText = 'Hide';
-          let button = e.target;
-          e.target.clicked = 1;
+        simpleAddress.pop()
+        simpleAddress = simpleAddress.join(' ').toUpperCase()
 
-          let table = button.parentElement.parentElement;
-
-          let dataTable = document.createElement('table');
-          if (complaintData[0]) {
-            dataTable.innerHTML = `
-          <thead> 
-              <tr> <td><b style="margin-right: position: sticky; 7px;">Date of Complaint</b></td>  <td><b>Complaint Type</b></td> <td style="padding-left: 15px;"><b>Description</b></td></tr>
-          </thead> 
-          <tbody style="max-height: 274px;">${complaintData
-            .map(incident => {
-              let createdDateArr = incident.created_date.split('-');
-              let createdDateHuman = `${createdDateArr[1]}/${createdDateArr[0]}`;
-              return `<tr>
-                      <td style="width: 130px;"> ${createdDateHuman}</td>       
-                      <td style="width: 150px;"> ${
-                        incident.complaint_type
-                      } </td>
-                      <td style="padding-left: 15px;">${incident.descriptor[0] +
-                        incident.descriptor.slice(1).toLowerCase()}</td>
-                  </tr>`;
-            })
-            .join('')}
-          </tbody>`;
-            e.target.parentElement.style =
-              'background-color: #FFFBB6; margin-bottom: 0px; width: 500px; border: 1px black dashed; border-bottom: 0px;';
-          } else {
-            dataTable.innerHTML = `
-          <thead> 
-              <tr> <b style='text-align: left'> No complaints to show </b></tr>
-          </thead>`;
-          }
-          dataTable.className = 'dataTable';
-          const tableContainer = document.createElement('div');
-          tableContainer.style =
-            'width: 500px; overflow: scroll; max-height: 276px; border-width: 1px; border-top: 0px; border-color: black; border-style: dashed; background-color: #FFFBB6; margin-top: 0px; display: flex; justify-content: center; align-content: center;';
-          tableContainer.id = 'tableContainer';
-          tableContainer.appendChild(dataTable);
-          table.appendChild(tableContainer);
-        } else if (+e.target.clicked) {
-          e.target.innerText = 'See all';
-          e.target.clicked = 0;
-          e.target.parentElement.style =
-            'background-color: #FFFBB6; margin-bottom: 0px';
-          let article = e.target.parentElement.parentElement;
-          let dataTable = article.querySelector('#tableContainer');
-          dataTable.remove();
-        }
-      }
+      // const simpleAddress = document
+      //   .getElementsByClassName('backend_data')[0]
+      //   .getElementsByTagName('a')[0]
+      //   .innerText.toUpperCase();
 
       let complaintData;
       fetch(
         `https://data.cityofnewyork.us/resource/erm2-nwe9.json?incident_address=${simpleAddress}&$where=created_date%20between%20%272015-01-10T12:00:00%27%20and%20%272019-11-10T14:00:00%27&borough=${currBorough}&location_type=RESIDENTIAL BUILDING`
       ).then(data => {
         data.json().then(jsonData => {
+          console.log(
+            'the fetch call was:',
+            `https://data.cityofnewyork.us/resource/erm2-nwe9.json?incident_address=${simpleAddress}&$where=created_date%20between%20%272015-01-10T12:00:00%27%20and%20%272019-11-10T14:00:00%27&borough=${currBorough}&location_type=RESIDENTIAL BUILDING`
+          );
           console.log('the complaint data is...', jsonData);
           complaintData = jsonData;
 
@@ -234,6 +254,35 @@ chrome.storage.sync.get(['homeRevealOn'], async result => {
             clickHandler(e, complaintData.reverse());
         });
       });
+    } else if (pathNames[1] === 'building' && !pathNames[3]) {
+      const complaintListItem = document.createElement('li')
+      const simpleAddress = document.querySelector("article.right-two-fifths.main-info > h2").innerText.split(',')[0].toUpperCase()
+      let currBorough = document.querySelector("article.right-two-fifths.main-info > h2").innerText.split(',')[1].toUpperCase()
+
+    let complaintData;
+    fetch(
+      `https://data.cityofnewyork.us/resource/erm2-nwe9.json?incident_address=${simpleAddress}&$where=created_date%20between%20%272015-01-10T12:00:00%27%20and%20%272019-11-10T14:00:00%27&borough=${currBorough}&location_type=RESIDENTIAL BUILDING`
+    ).then(data => {
+      data.json().then(jsonData => {
+        console.log(
+          'the fetch call was:',
+          `https://data.cityofnewyork.us/resource/erm2-nwe9.json?incident_address=${simpleAddress}&$where=created_date%20between%20%272015-01-10T12:00:00%27%20and%20%272019-11-10T14:00:00%27&borough=${currBorough}&location_type=RESIDENTIAL BUILDING`
+        );
+        console.log('the complaint data is...', jsonData);
+        complaintData = jsonData;
+
+        const complaints = document.createElement('div');
+        complaints.className = 'details_info';
+        complaints.innerHTML = `<span class="nobreak" style="color: red; font-size: 16px; margin-left: 5px"><b>${complaintData.length} building complaints</b> (last 5 years)</span> 
+    <button id="dataButton" clicked="0" style="width: 90px; height: 30px; font-size: 14px; margin: 8px 0px 4px 8px;">See more</button>`;
+        complaints.style = 'background-color: #FFFBB6; margin-bottom: 0px';
+
+        const mainContainer = document.querySelector("article.right-two-fifths.main-info")
+        mainContainer.appendChild(complaints);
+        complaints.querySelector('#dataButton').onclick = e =>
+          clickHandler(e, complaintData.reverse());
+      });
+    })
     }
   }
 });
