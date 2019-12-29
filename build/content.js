@@ -208,15 +208,19 @@ chrome.storage.sync.get(['homeRevealOn'], async result => {
       (pathNames[1] === 'building' && pathNames[3]) ||
       (pathNames[1] === 'rental' && pathNames[2])
     ) {
-      let addressEnd = document
+      let addressEnd;
+      if (document.getElementsByClassName('backend_data')[0]
+      .getElementsByTagName('span')[0]) {
+         addressEnd = document
         .getElementsByClassName('backend_data')[0]
         .getElementsByTagName('span')[0]
-        .innerText.split(' ');
-      let idx = addressEnd.indexOf('NY');
-      let boroughZipID = addressEnd[idx + 1].slice(0, 3);
+        .innerText.split(',');
+      } else {
+         addressEnd = document.querySelector("#content > main > div.row.DetailsPage > article:nth-child(3) > section:nth-child(6) > div > div:nth-child(3) > a").innerText.split(',')
+      }
+      let boroughZipID = addressEnd.pop().slice(1, 4);
       const currBorough = getCurrentBorough(boroughZipID);
-      console.log('the current borough is...', currBorough);
-
+      
       let simpleAddress = document
         .querySelector('main')
         .querySelector('.incognito')
