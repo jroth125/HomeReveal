@@ -65,10 +65,18 @@ const getZipCode = async () => {
   let dummy = await document.createElement('div');
 
   dummy.innerHTML = htmltext;
-  let addressEnd = await dummy
+  let addressEnd;
+  if (dummy
+    .getElementsByClassName('backend_data')[0]
+    .getElementsByTagName('span')[0]) {
+      addressEnd = dummy
     .getElementsByClassName('backend_data')[0]
     .getElementsByTagName('span')[0]
     .innerText.split(' ');
+    } else {
+      addressEnd = document.querySelector("#content > main > div.row.DetailsPage > article:nth-child(3) > section:nth-child(6) > div > div:nth-child(3) > a").innerText.split(' ')
+
+    }
   let idx = addressEnd.indexOf('NY');
   let boroughZipID = addressEnd[idx + 1].slice(0, 3);
   return boroughZipID;
@@ -244,18 +252,17 @@ chrome.storage.sync.get(['homeRevealOn'], async result => {
             `https://data.cityofnewyork.us/resource/erm2-nwe9.json?incident_address=${simpleAddress}&$where=created_date%20between%20%272015-01-10T12:00:00%27%20and%20%272019-11-10T14:00:00%27&borough=${currBorough}&location_type=RESIDENTIAL BUILDING`
           );
           console.log('the complaint data is...', jsonData);
-          complaintData = jsonData;
 
           const complaints = document.createElement('div');
           complaints.className = 'details_info';
-          complaints.innerHTML = `<span class="nobreak" style="color: red; font-size: 16px; margin-left: 5px"><b>${complaintData.length} building complaints</b> (last 5 years)</span> 
-      <button id="dataButton" clicked="0" style="width: 90px; height: 30px; font-size: 14px; margin: 8px 0px 4px 8px;">See more</button>`;
-          complaints.style = 'background-color: #FFFBB6; margin-bottom: 0px';
+          complaints.innerHTML = `<span class="nobreak" style="color: red; font-size: 16px; margin-left: 5px"><b>${jsonData.length} building complaints</b> (last 5 years)</span> 
+          ${jsonData.length ? '<button id="dataButton" clicked="0" style="width: 90px; height: 30px; font-size: 14px; margin: 8px 0px 4px 8px;">See more</button>' : ''}`;
+          complaints.style = `background-color: ${jsonData.length ? '#FFFBB6': 'white'}; margin-bottom: 0px`;
 
           const holdingDiv = document.getElementsByClassName('details')[0];
           holdingDiv.appendChild(complaints);
           complaints.querySelector('#dataButton').onclick = e =>
-            clickHandler(e, complaintData.reverse());
+            clickHandler(e, jsonData.reverse());
         });
       });
     } else if (pathNames[1] === 'building' && !pathNames[3]) {
@@ -273,18 +280,17 @@ chrome.storage.sync.get(['homeRevealOn'], async result => {
           `https://data.cityofnewyork.us/resource/erm2-nwe9.json?incident_address=${simpleAddress}&$where=created_date%20between%20%272015-01-10T12:00:00%27%20and%20%272019-11-10T14:00:00%27&borough=${currBorough}&location_type=RESIDENTIAL BUILDING`
         );
         console.log('the complaint data is...', jsonData);
-        complaintData = jsonData;
 
         const complaints = document.createElement('div');
         complaints.className = 'details_info';
-        complaints.innerHTML = `<span class="nobreak" style="color: red; font-size: 16px; margin-left: 5px"><b>${complaintData.length} building complaints</b> (last 5 years)</span> 
-    <button id="dataButton" clicked="0" style="width: 90px; height: 30px; font-size: 14px; margin: 8px 0px 4px 8px;">See more</button>`;
+        complaints.innerHTML = `<span class="nobreak" style="color: red; font-size: 16px; margin-left: 5px"><b>${jsonData.length} building complaints</b> (last 5 years)</span> 
+      ${jsonData.length ? '<button id="dataButton" clicked="0" style="width: 90px; height: 30px; font-size: 14px; margin: 8px 0px 4px 8px;">See more</button>' : ''}`;
         complaints.style = 'background-color: #FFFBB6; margin-bottom: 0px';
 
         const mainContainer = document.querySelector("article.right-two-fifths.main-info")
         mainContainer.appendChild(complaints);
         complaints.querySelector('#dataButton').onclick = e =>
-          clickHandler(e, complaintData.reverse());
+          clickHandler(e, jsonData.reverse());
       });
     })
     }
