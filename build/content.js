@@ -193,7 +193,7 @@ chrome.storage.sync.get(['homeRevealOn'], async result => {
           let address = button.id;
           let table = button.parentElement.parentElement.parentElement;
           const data = await fetch(
-            `https://data.cityofnewyork.us/resource/erm2-nwe9.json?incident_address=${address}&$where=created_date%20between%20%272015-01-10T12:00:00%27%20and%20%272019-11-10T14:00:00%27&borough=${currBorough}&location_type=RESIDENTIAL BUILDING`
+            `https://data.cityofnewyork.us/resource/erm2-nwe9.json?incident_address=${address}&$where=created_date%20between%20%27${fiveYearsAgoDate}T12:00:00%27%20and%20%27${today}T14:00:00%27&borough=${currBorough}&location_type=RESIDENTIAL BUILDING`
           );
           const json = await data.json();
           console.log('data is', json);
@@ -289,13 +289,12 @@ chrome.storage.sync.get(['homeRevealOn'], async result => {
         : simpleAddress.toUpperCase();
 
       let complaintData;
-      fetch(
-        `https://data.cityofnewyork.us/resource/erm2-nwe9.json?incident_address=${simpleAddress}&$where=created_date%20between%20%272015-01-10T12:00:00%27%20and%20%272019-11-10T14:00:00%27&borough=${currBorough}&location_type=RESIDENTIAL BUILDING`
+      fetch(`https://data.cityofnewyork.us/resource/erm2-nwe9.json?incident_address=${simpleAddress}&$where=created_date%20between%20%27${fiveYearsAgoDate}T12:00:00%27%20and%20%27${today}T14:00:00%27&borough=${currBorough}&location_type=RESIDENTIAL BUILDING`
       ).then(data => {
         data.json().then(jsonData => {
           console.log(
             'the fetch call was:',
-            `https://data.cityofnewyork.us/resource/erm2-nwe9.json?incident_address=${simpleAddress}&$where=created_date%20between%20%272015-01-10T12:00:00%27%20and%20%272019-11-10T14:00:00%27&borough=${currBorough}&location_type=RESIDENTIAL BUILDING`
+            `https://data.cityofnewyork.us/resource/erm2-nwe9.json?incident_address=${simpleAddress}&$where=created_date%20between%20%27${fiveYearsAgoDate}T12:00:00%27%20and%20%27${today}T14:00:00%27&borough=${currBorough}&location_type=RESIDENTIAL BUILDING`
           );
           console.log('the complaint data is...', jsonData);
 
@@ -334,12 +333,12 @@ chrome.storage.sync.get(['homeRevealOn'], async result => {
 
       let complaintData;
       fetch(
-        `https://data.cityofnewyork.us/resource/erm2-nwe9.json?incident_address=${simpleAddress}&$where=created_date%20between%20%272015-01-10T12:00:00%27%20and%20%272019-11-10T14:00:00%27&borough=${currBorough}&location_type=RESIDENTIAL BUILDING`
+        `https://data.cityofnewyork.us/resource/erm2-nwe9.json?incident_address=${simpleAddress}&$where=created_date%20between%20%27${fiveYearsAgoDate}T12:00:00%27%20and%20%27${today}T14:00:00%27&borough=${currBorough}&location_type=RESIDENTIAL BUILDING`
       ).then(data => {
         data.json().then(jsonData => {
           console.log(
             'the fetch call was:',
-            `https://data.cityofnewyork.us/resource/erm2-nwe9.json?incident_address=${simpleAddress}&$where=created_date%20between%20%272015-01-10T12:00:00%27%20and%20%272019-11-10T14:00:00%27&borough=${currBorough}&location_type=RESIDENTIAL BUILDING`
+            `https://data.cityofnewyork.us/resource/erm2-nwe9.json?incident_address=${simpleAddress}&$where=created_date%20between%20%27${fiveYearsAgoDate}T12:00:00%27%20and%20%27${today}T14:00:00%27&borough=${currBorough}&location_type=RESIDENTIAL BUILDING`
           );
           console.log('the complaint data is...', jsonData);
 
